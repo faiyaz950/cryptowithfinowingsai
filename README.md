@@ -1,61 +1,50 @@
-# CryptoWithFinowingsAI — Frontend
+# Finowings AI — Frontend
 
-Next.js 16 app: AI chat, portfolio tracking, aur ek crypto trading terminal
-(live Delta Exchange candles, EMA overlays, AI coin screener, backtesting aur
-strategies).
+Next.js 16 app: AI chat, portfolio tracking, and a crypto trading terminal
+(live Delta Exchange candles, EMA overlays, backtesting and strategies).
 
-Backend alag repo mein hai — [cryptowithfinoai](https://github.com/faiyaz950/cryptowithfinoai)
-(FastAPI + Flask, ek hi service).
+## Deploying on Vercel
 
-## Pages
+This app lives in a **subdirectory** of the monorepo, so the Vercel project must
+be configured with:
 
-| Route | Kya hai |
-|---|---|
-| `/` | AI chat — multi-model (Gemini / OpenAI / Claude / Groq), streaming |
-| `/trade` | Crypto terminal — Markets, Screener, Backtest, Strategies |
-| `/trade/strategies/[id]` | Har strategy ka apna run page — live signal + backtest |
-| `/portfolio` | Holdings, P&L, allocation charts, file import |
+| Setting | Value |
+| --- | --- |
+| Root Directory | `arjunai/frontend-nextjs` |
+| Framework Preset | Next.js (auto-detected) |
 
-## Local par chalao
-
-```bash
-npm install
-cp .env.example .env.local
-npm run dev            # http://127.0.0.1:3003
-```
-
-Backend bhi chalna chahiye, warna charts aur chat dono khaali rahenge.
-Uske repo mein instructions hain; default `http://127.0.0.1:8000` par chalta hai.
+Leaving Root Directory empty makes Vercel build the repository root, which has no
+app in it — the deployment then serves a `404: NOT_FOUND`.
 
 ## Environment variables
 
-| Var | Kya hai |
-|---|---|
-| `NEXT_PUBLIC_BACKEND_URL` | Backend ka origin, bina trailing slash |
-| `NEXT_PUBLIC_API_URL` | Wahi backend (AI chat routes) |
-| `NEXT_PUBLIC_CRYPTO_API_URL` | Wahi backend + `/api` (trading routes) |
-| `BACKEND_URL` | Server-side rewrite ke liye; browser ko expose nahi hota |
+Set these in **Project → Settings → Environment Variables**. Each value is the
+public URL of a backend you have deployed; the defaults below only work locally.
 
-Teeno `NEXT_PUBLIC_*` ek hi backend ko point karte hain — alag services nahi
-hain. Alag naam isliye hain kyunki pehle do backends the; code abhi bhi dono
-padhta hai, isliye dono set karna zaroori hai.
+| Variable | Points at | Local default |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | `arjunai/backend` (FastAPI, chat/AI) | `http://localhost:8001` |
+| `NEXT_PUBLIC_CRYPTO_API_URL` | `cryptoproject` (Flask) — note the `/api` suffix | `http://127.0.0.1:2000/api` |
+| `CRYPTO_API_URL` | `cryptoproject` — same host, **no** `/api` suffix | `http://127.0.0.1:2000` |
 
-## Deploy — Vercel
+`NEXT_PUBLIC_*` variables are inlined at build time, so changing one requires a
+**redeploy**, not just a save.
 
-| Setting | Value |
-|---|---|
-| Framework Preset | Next.js (auto-detect) |
-| Root Directory | **khaali chhod dein** — ye repo hi app hai |
-| Build Command | default (`next build`) |
+Without these the site still builds and renders; the trade page simply reports
+that the backend is offline.
 
-Vercel project banane ke baad Settings → Environment Variables mein wo chaar vars
-daalein, sab mein deployed backend ka URL (jaise
-`https://cryptowithfinoai-backend.onrender.com`).
+## Local development
 
-Phir **backend** ke `FRONTEND_URL` mein is Vercel app ka URL daalna na bhoolein —
-wo CORS allow-list mein jaata hai. Bina uske browser se har API call block hogi,
-chahe backend bilkul theek chal raha ho.
+```bash
+npm install
+npm run dev
+```
 
-## Note
+Runs on http://127.0.0.1:3003. Copy `.env.example` to `.env.local` first if you
+need to point at non-default backend ports.
 
-Ye software analysis aur backtesting ke liye hai, investment advice ke liye nahi.
+The crypto backend is started separately:
+
+```bash
+cd ../../cryptoproject && python3 backend_api.py
+```
